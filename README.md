@@ -1,6 +1,6 @@
 # AutomateAffiliateBlogs
 AutomateAffiliateBlogs
 
-End of this file 
+End of this file.
 
 
