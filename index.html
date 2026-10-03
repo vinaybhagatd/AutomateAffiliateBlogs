@@ -186,16 +186,31 @@
                 submitBtn.disabled = true;
                 submitBtn.textContent = "Processing & Redirecting...";
 
-                // Base Google Apps Script Web App URL
+                // 1. Determine PayPal link
+                var paypalUrl = "https://paypal.me/VinayDBhagat/149";
+                if (plan === "growth") paypalUrl = "https://paypal.me/VinayDBhagat/399";
+                if (plan === "pro") paypalUrl = "https://paypal.me/VinayDBhagat/999";
+
+                // 2. Silently ping Google Apps Script in the background to log sheet & send emails
                 var scriptUrl = "https://script.google.com/macros/s/AKfycbyuOUiF2uXd4aulDpj-SkQses9JsfcF_Wt32sM47VrYAHrxcxuXVezmD2HwFseOXEr3wQ/exec";
                 
-                // Append form fields as query parameters
-                var targetUrl = scriptUrl + "?name=" + encodeURIComponent(name) + 
-                                            "&email=" + encodeURIComponent(email) + 
-                                            "&plan=" + encodeURIComponent(plan);
+                // Using navigator.sendBeacon or a no-cors fetch ensures background delivery without blocking the user
+                var formData = new URLSearchParams();
+                formData.append("name", name);
+                formData.append("email", email);
+                formData.append("plan", plan);
 
-                // Redirect user to Google Apps Script (which logs to sheet, sends email, and redirects to PayPal)
-                window.location.href = targetUrl;
+                // Send background request (fire-and-forget)
+                fetch(scriptUrl, {
+                    method: "POST",
+                    mode: "no-cors",
+                    body: formData
+                }).catch(err => console.log("Background log sent", err));
+
+                // 3. Instantly redirect user directly to PayPal from the frontend (bypassing all Google/iframe warnings)
+                setTimeout(function() {
+                    window.location.href = paypalUrl;
+                }, 500);
             };
         });
     </script>
