@@ -120,7 +120,7 @@
 
     <header>
         <h1>AutomateAffiliateBlogs</h1>
-        <p>Lifetime Affiliate Blog Generator on Autopilot</p>
+        <p>Lifetime Offline Affiliate Blog Generator on Autopilot</p>
     </header>
 
     <section>
@@ -168,51 +168,34 @@
             var form = document.getElementById("leadForm");
 
             btn.onclick = function () {
-                console.log("Get Started button clicked");
                 modal.style.display = "block";
             };
 
             closeBtn.onclick = function () {
-                console.log("Close button clicked");
                 modal.style.display = "none";
             };
 
             form.onsubmit = function (event) {
-                event.preventDefault(); // stop default form reload
-                console.log("Form submitted");
-
+                event.preventDefault();
+                
                 var name = document.getElementById("name").value;
                 var email = document.getElementById("email").value;
                 var plan = document.getElementById("plan").value;
+                var submitBtn = form.querySelector("button[type='submit']");
 
-                console.log("Collected values:", { name, email, plan });
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Processing & Redirecting...";
 
-                fetch("https://script.google.com/macros/s/AKfycbxUedzXPWbeYgY_vLZCR7pa00rbFgMXVIAC0MhqFwFkxhKzBooFp199VGSGacCBaKCQ/exec", {
-                    method: "POST",
-                    body: JSON.stringify({ name: name, email: email, plan: plan }),
-                    headers: { "Content-Type": "application/json" }
-                })
-                    .then(r => {
-                        console.log("Fetch response object:", r);
-                        return r.text();
-                    })
-                    .then(t => {
-                        console.log("Fetch response text:", t);
-                        alert("Response from Sheets: " + t);
+                // Base Google Apps Script Web App URL
+                var scriptUrl = "https://script.google.com/macros/s/AKfycbyuOUiF2uXd4aulDpj-SkQses9JsfcF_Wt32sM47VrYAHrxcxuXVezmD2HwFseOXEr3wQ/exec";
+                
+                // Append form fields as query parameters
+                var targetUrl = scriptUrl + "?name=" + encodeURIComponent(name) + 
+                                            "&email=" + encodeURIComponent(email) + 
+                                            "&plan=" + encodeURIComponent(plan);
 
-                        var url = "";
-                        if (plan === "starter") url = "https://paypal.me/VinayDBhagat/149";
-                        if (plan === "growth") url = "https://paypal.me/VinayDBhagat/399";
-                        if (plan === "pro") url = "https://paypal.me/VinayDBhagat/999";
-
-                        console.log("Redirecting to PayPal URL:", url);
-                        window.open(url, "_blank");
-                        modal.style.display = "none";
-                    })
-                    .catch(err => {
-                        console.error("Fetch error:", err);
-                        alert("Error: " + err);
-                    });
+                // Redirect user to Google Apps Script (which logs to sheet, sends email, and redirects to PayPal)
+                window.location.href = targetUrl;
             };
         });
     </script>
